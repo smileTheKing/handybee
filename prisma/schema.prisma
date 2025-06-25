@@ -1,0 +1,201 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id            String    @id @default(cuid())
+    name          String?
+    email         String    @unique
+    emailVerified DateTime?
+    image         String?
+    password      String?
+    role          Role      @default(USER)
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+
+    // Profile
+    title         String?
+    description   String?
+    hourlyRate    Float?
+    level         String?
+    responseTime  String?
+    skills        String[]
+    languages     String[]
+
+    // Relations
+    gigs          Gig[]
+    orders        Order[]    @relation("Buyer")
+    sellerOrders  Order[]    @relation("Seller")
+    reviews       Review[]   @relation("Reviewer")
+    receivedReviews Review[] @relation("Reviewed")
+    messages      Message[]  @relation("Sender")
+    receivedMessages Message[] @relation("Receiver")
+
+    accounts      Account[]
+    sessions      Session[]
+}
+
+model Account {
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+    session_state     String?
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
+model Gig {
+    id          String   @id @default(cuid())
+    title       String
+    description String
+    category    String
+    subcategory String?
+    price       Float
+    images      String[]
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    published   Boolean  @default(false)
+
+    // Relations
+    seller      User     @relation(fields: [sellerId], references: [id])
+    sellerId    String
+    orders      Order[]
+    reviews     Review[]
+    packages    Package[]
+
+    @@index([category])
+    @@index([sellerId])
+}
+
+model Package {
+    id          String   @id @default(cuid())
+    name        String
+    description String
+    price       Float
+    deliveryTime Int
+    revisions   Int
+    features    String[]
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    gig         Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+    gigId       String
+    orders      Order[]
+
+    @@index([gigId])
+}
+
+model Order {
+    id          String   @id @default(cuid())
+    status      OrderStatus @default(PENDING)
+    total       Float
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    buyer       User     @relation("Buyer", fields: [buyerId], references: [id])
+    buyerId     String
+    seller      User     @relation("Seller", fields: [sellerId], references: [id])
+    sellerId    String
+    gig         Gig      @relation(fields: [gigId], references: [id])
+    gigId       String
+    package     Package  @relation(fields: [packageId], references: [id])
+    packageId   String
+    messages    Message[]
+    reviews     Review[]
+
+    @@index([buyerId])
+    @@index([sellerId])
+    @@index([gigId])
+}
+
+model Review {
+    id          String   @id @default(cuid())
+    rating      Int
+    comment     String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    order       Order    @relation(fields: [orderId], references: [id])
+    orderId     String
+    reviewer    User     @relation("Reviewer", fields: [reviewerId], references: [id])
+    reviewerId  String
+    reviewed    User     @relation("Reviewed", fields: [reviewedId], references: [id])
+    reviewedId  String
+    gig         Gig      @relation(fields: [gigId], references: [id])
+    gigId       String
+
+    @@index([orderId])
+    @@index([reviewerId])
+    @@index([reviewedId])
+    @@index([gigId])
+}
+
+model Message {
+    id          String   @id @default(cuid())
+    content     String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    order       Order    @relation(fields: [orderId], references: [id])
+    orderId     String
+    sender      User     @relation("Sender", fields: [senderId], references: [id])
+    senderId    String
+    receiver    User     @relation("Receiver", fields: [receiverId], references: [id])
+    receiverId  String
+
+    @@index([orderId])
+    @@index([senderId])
+    @@index([receiverId])
+}
+
+enum Role {
+    USER
+    SELLER
+    ADMIN
+}
+
+enum OrderStatus {
+    PENDING
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+    DISPUTED
+}
