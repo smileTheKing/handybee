@@ -18,13 +18,13 @@ export default async function SignUpPage() {
         </div>
         <div className="relative z-20 flex items-center text-lg font-medium">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold">HandleBee</span>
+            <span className="text-2xl font-bold">HandyBee</span>
           </Link>
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;Join our community of talented freelancers and clients. Start your journey with HandleBee today.&rdquo;
+              &ldquo;Join our community of talented freelancers and clients. Start your journey with HandyBee today.&rdquo;
             </p>
             <footer className="text-sm">John Smith</footer>
           </blockquote>

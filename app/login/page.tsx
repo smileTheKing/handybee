@@ -18,14 +18,14 @@ export default async function LoginPage() {
         </div>
         <div className="relative z-20 flex items-center text-lg font-medium">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold">HandleBee</span>
+            <span className="text-2xl font-bold">HandyBee</span>
           </Link>
         </div>
         <div className="relative z-20 mt-auto">
           
           <blockquote className="space-y-2">  
             <p className="text-lg">
-              &quot;HandleBee has transformed how I manage my freelance business. The platform is intuitive and the community is amazing.&quot;
+              &quot;HandyBee has transformed how I manage my freelance business. The platform is intuitive and the community is amazing.&quot;
             </p>
             <footer className="text-sm">Sofia Davis</footer>
           </blockquote>
